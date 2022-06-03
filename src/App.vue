@@ -1,7 +1,14 @@
 <template>
+  <div class="page">
   <div class="container">
-    <form class="card" @submit.prevent="submit">
+    <form 
+      class="card" 
+      @submit.prevent="submit"
+      >
       <h1>Auth</h1>
+
+      <h2 v-if="error">{{error}}</h2>
+      
       <div class="form-control">
         <label for="email">Email
         </label>
@@ -47,17 +54,27 @@
       </button>
     </form>
 
-    <UserList/>
+    <Suspense v-if="submitted">
+        <user-list></user-list>
+        <template #fallback>
+          <div class="loader"></div>
+        </template>
+    </Suspense>
+  </div>
   </div>
 </template>
 
 <script>
+  import {ref, onErrorCaptured} from 'vue'
+
+  import UserList from './components/UserList.vue';
   import { useForm } from './use/form';
-  import {UserList} from './components/UserList.vue'
+  
   const required = (val) => !!val;
   const minLength = (num) => (val) => val.length >= num;
 
 export default {
+  components: { UserList },
     setup() {
       const form = useForm({
         email: {
@@ -73,15 +90,19 @@ export default {
         },
       });
 
+      const submitted = ref(false)
+      const error = ref()
+
       function submit() {
-        // console.log('email', form.email.value)
-        // console.log('password', form.password.value)
+        submitted.value = true
       }
 
-      return { form, submit };
-    },
-    components: {
-      UserList 
+      onErrorCaptured(e => {
+        error.value = e.message
+
+      })
+
+      return { form, submit, submitted, error };
     },
   };
 </script>

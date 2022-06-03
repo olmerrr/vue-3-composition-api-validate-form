@@ -6,7 +6,6 @@ export function useForm(init = {}) {
   const validKey = 'valid'
 
   for( const [key, value] of Object.entries(init)) {
-    console.log(key, value);
     form[key] = useField(value)
   }
 
